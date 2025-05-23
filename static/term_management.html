@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>术语表管理 | 阅读工具箱</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 复用你现有的样式 */
+    :root {
+      --primary-color: #4a6fa5;
+      --secondary-color: #6b8cae;
+      --accent-color: #ff7e5f;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --border-color: #e1e5eb;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--dark-color);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: var(--secondary-color);
+      font-size: 1rem;
+      font-weight: 300;
+    }
+    
+    .management-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+    
+    .search-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .search-bar input {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    
+    .btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+      background-color: #3a5a8f;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+    
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+    }
+    
+    .btn-success:hover {
+      background-color: #218838;
+    }
+    
+    #term-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    
+    #term-table th, #term-table td {
+      border: 1px solid var(--border-color);
+      padding: 0.8rem;
+      text-align: left;
+    }
+    
+    #term-table th {
+      background-color: #f8f9fa;
+      font-weight: 500;
+    }
+    
+    #term-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+    
+    #term-table tr:hover {
+      background-color: #e9ecef;
+    }
+    
+    .term-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--secondary-color);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 1rem 0;
+      color: var(--secondary-color);
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(74, 111, 165, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    .sort-icon {
+      cursor: pointer;
+      margin-left: 5px;
+      font-size: 0.9em;
+      color: var(--secondary-color);
+      transition: color 0.2s;
+    }
+    
+    .sort-icon:hover {
+      color: var(--primary-color);
+    }
+    
+    .sort-icon.active {
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      #term-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+
+    .sort-controls {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    margin-left: 8px;
+    position: relative;
+    top: -2px;
+    }
+
+    .sort-icon {
+    cursor: pointer;
+    color: var(--secondary-color);
+    transition: all 0.2s ease;
+    font-size: 0.9em;
+    }
+
+    .sort-icon:hover {
+    color: var(--primary-color);
+    transform: scale(1.2);
+    }
+
+    .sort-icon.active {
+    color: var(--accent-color);
+    font-weight: bold;
+    }
+</style>
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.26.0/dist/index.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>术语表管理</h1>
+      <p class="subtitle">查看、编辑和管理您的术语翻译</p>
+    </header>
+    
+    <div class="management-card">
+      <div class="search-bar">
+        <input type="text" id="searchTerm" placeholder="搜索术语...">
+        <button class="btn" id="searchBtn">搜索</button>
+        <button class="btn btn-success" id="addTermBtn">添加术语</button>
+      </div>
+      
+      <div class="loading" id="loadingIndicator">
+        <span class="loading-spinner"></span>加载中...
+      </div>
+      
+      <table id="term-table">
+        <thead>
+          <tr>
+            <th>
+                术语 
+                <div class="sort-controls">
+                  <svg class="sort-icon" data-column="term" data-order="asc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 14l5-5 5 5H7z"/>
+                  </svg>
+                  <svg class="sort-icon" data-column="term" data-order="desc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 10l5 5 5-5H7z"/>
+                  </svg>
+                </div>
+              </th>
+            <th>
+                翻译
+                <div class="sort-controls">
+                  <svg class="sort-icon" data-column="translation" data-order="asc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 14l5-5 5 5H7z"/>
+                  </svg>
+                  <svg class="sort-icon" data-column="translation" data-order="desc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 10l5 5 5-5H7z"/>
+                  </svg>
+                </div>
+            </th>
+            <th>
+                更新时间
+                <div class="sort-controls">
+                  <svg class="sort-icon" data-column="updated_at" data-order="asc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 14l5-5 5 5H7z"/>
+                  </svg>
+                  <svg class="sort-icon" data-column="updated_at" data-order="desc" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 10l5 5 5-5H7z"/>
+                  </svg>
+                </div>
+              </th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="term-table-body">
+          <!-- 术语数据将通过JavaScript动态加载 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- 添加/编辑术语的模态框 -->
+  <div class="modal" id="termModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">添加新术语</h3>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      <form id="termForm">
+        <input type="hidden" id="editTermId">
+        <div class="form-group">
+          <label for="termInput">术语</label>
+          <input type="text" id="termInput" required>
+        </div>
+        <div class="form-group">
+          <label for="translationInput">翻译</label>
+          <input type="text" id="translationInput" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" id="cancelBtn">取消</button>
+          <button type="submit" class="btn btn-success" id="saveTermBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const termTableBody = document.getElementById('term-table-body');
+      const searchTermInput = document.getElementById('searchTerm');
+      const searchBtn = document.getElementById('searchBtn');
+      const addTermBtn = document.getElementById('addTermBtn');
+      const termModal = document.getElementById('termModal');
+      const closeModalBtn = document.getElementById('closeModal');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const termForm = document.getElementById('termForm');
+      const modalTitle = document.getElementById('modalTitle');
+      const termInput = document.getElementById('termInput');
+      const translationInput = document.getElementById('translationInput');
+      const editTermId = document.getElementById('editTermId');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      
+      let currentTerms = [];
+      let currentSort = {
+        column: 'term',
+        order: 'asc'
+      };
+
+      // 排序函数
+      function sortTerms(terms, column, order) {
+        return terms.sort((a, b) => {
+          let valA = a[column];
+          let valB = b[column];
+          // 如果是“翻译”列，用拼音排序
+          if (column === 'translation') {
+            valA = window.pinyinPro.pinyin(valA || '', { toneType: 'none', type: 'array' }).join(' ');
+            valB = window.pinyinPro.pinyin(valB || '', { toneType: 'none', type: 'array' }).join(' ');
+          } else if (column === 'term') {
+            valA = String(valA || '').toLowerCase();
+            valB = String(valB || '').toLowerCase();
+          } else if (column === 'updated_at') {
+            valA = new Date(valA).getTime();
+            valB = new Date(valB).getTime();
+            return order === 'asc' ? valA - valB : valB - valA;
+          } else {
+            valA = String(valA || '').toLowerCase();
+            valB = String(valB || '').toLowerCase();
+          }
+          const comparison = valA.localeCompare ? valA.localeCompare(valB, 'zh-Hans-CN', { sensitivity: 'base' }) : 0;
+          return order === 'asc' ? comparison : -comparison;
+        });
+      }
+
+      // 加载术语表数据
+      function loadTerms(searchQuery = '') {
+        loadingIndicator.style.display = 'block';
+        termTableBody.innerHTML = '';
+        
+        fetch('/api/glossary/all')
+          .then(response => response.json())
+          .then(data => {
+            currentTerms = data.terms || [];
+            
+            // 应用搜索过滤
+            const filteredTerms = searchQuery 
+              ? currentTerms.filter(term => 
+                  term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                  term.translation.toLowerCase().includes(searchQuery.toLowerCase()))
+              : currentTerms;
+            
+            // 应用排序
+            const sortedTerms = sortTerms(filteredTerms, currentSort.column, currentSort.order);
+            
+            if (sortedTerms.length === 0) {
+              const row = document.createElement('tr');
+              row.innerHTML = `<td colspan="4" style="text-align: center;">${searchQuery ? '未找到匹配的术语' : '术语表为空'}</td>`;
+              termTableBody.appendChild(row);
+            } else {
+              sortedTerms.forEach(term => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${term.term}</td>
+                  <td>${term.translation}</td>
+                  <td>${new Date(term.updated_at).toLocaleString()}</td>
+                  <td class="term-actions">
+                    <button class="btn edit-term" data-id="${term.term}">编辑</button>
+                    <button class="btn btn-danger delete-term" data-id="${term.term}">删除</button>
+                  </td>
+                `;
+                termTableBody.appendChild(row);
+              });
+              
+              // 添加事件监听器到新创建的按钮
+              document.querySelectorAll('.edit-term').forEach(btn => {
+                btn.addEventListener('click', handleEditTerm);
+              });
+              
+              document.querySelectorAll('.delete-term').forEach(btn => {
+                btn.addEventListener('click', handleDeleteTerm);
+              });
+            }
+          })
+          .catch(error => {
+            console.error('加载术语表失败:', error);
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="4" style="text-align: center; color: red;">加载术语表失败</td>`;
+            termTableBody.appendChild(row);
+          })
+          .finally(() => {
+            loadingIndicator.style.display = 'none';
+          });
+      }
+
+      // 设置排序按钮
+      function setupSortButtons() {
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+          icon.addEventListener('click', function() {
+            const column = this.getAttribute('data-column');
+            const order = this.getAttribute('data-order');
+            
+            // 更新当前排序状态
+            currentSort = { column, order };
+            
+            // 更新活动状态样式
+            document.querySelectorAll('.sort-icon').forEach(i => {
+              i.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // 重新加载术语表
+            loadTerms(searchTermInput.value.trim());
+          });
+        });
+      }
+      
+      // 处理编辑术语
+      function handleEditTerm(event) {
+        const termId = event.target.getAttribute('data-id');
+        const term = currentTerms.find(t => t.term === termId);
+        
+        if (term) {
+          modalTitle.textContent = '编辑术语';
+          termInput.value = term.term;
+          translationInput.value = term.translation;
+          editTermId.value = term.term;
+          termModal.style.display = 'flex';
+        }
+      }
+      
+      // 处理删除术语
+      function handleDeleteTerm(event) {
+        const termId = event.target.getAttribute('data-id');
+        
+        if (confirm(`确定要删除术语 "${termId}" 吗？`)) {
+          fetch(`/api/glossary/delete`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ term: termId })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              alert('术语删除成功');
+              loadTerms(searchTermInput.value.trim());
+            } else {
+              alert('删除失败: ' + (data.message || '未知错误'));
+            }
+          })
+          .catch(error => {
+            console.error('删除术语失败:', error);
+            alert('删除术语时出错');
+          });
+        }
+      }
+      
+      // 搜索术语
+      searchBtn.addEventListener('click', () => {
+        loadTerms(searchTermInput.value.trim());
+      });
+      
+      searchTermInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          loadTerms(searchTermInput.value.trim());
+        }
+      });
+      
+      // 添加新术语
+      addTermBtn.addEventListener('click', () => {
+        modalTitle.textContent = '添加新术语';
+        termForm.reset();
+        editTermId.value = '';
+        termModal.style.display = 'flex';
+      });
+      
+      // 关闭模态框
+      function closeModal() {
+        termModal.style.display = 'none';
+      }
+      
+      closeModalBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+      
+      // 点击模态框外部关闭
+      termModal.addEventListener('click', (e) => {
+        if (e.target === termModal) {
+          closeModal();
+        }
+      });
+      
+      // 保存术语
+      termForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const termData = {
+          term: termInput.value.trim(),
+          translation: translationInput.value.trim()
+        };
+        
+        const isEdit = editTermId.value !== '';
+        const url = isEdit ? '/api/glossary/update' : '/api/glossary/add';
+        
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(termData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            alert(`术语${isEdit ? '更新' : '添加'}成功`);
+            closeModal();
+            loadTerms(searchTermInput.value.trim());
+          } else {
+            alert(`${isEdit ? '更新' : '添加'}失败: ${data.message || '未知错误'}`);
+          }
+        })
+        .catch(error => {
+          console.error(`${isEdit ? '更新' : '添加'}术语失败:`, error);
+          alert(`${isEdit ? '更新' : '添加'}术语时出错`);
+        });
+      });
+      
+      // 初始化排序按钮
+      setupSortButtons();
+      
+      // 初始加载术语表
+      loadTerms();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能翻译工具 | 阅读工具箱</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4a6fa5;
+      --secondary-color: #6b8cae;
+      --accent-color: #ff7e5f;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --border-color: #e1e5eb;
+      --success-color: #28a745;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--dark-color);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+      background-image: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: var(--secondary-color);
+      font-size: 1rem;
+      font-weight: 300;
+    }
+    
+    .translation-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+    
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .language-selector {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    select {
+      flex: 1;
+      padding: 0.8rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      background-color: white;
+      cursor: pointer;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+    }
+    
+    .btn {
+      display: inline-block;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      width: 100%;
+    }
+    
+    .btn:hover {
+      background-color: #3a5a8f;
+      transform: translateY(-2px);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-copy {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      padding: 0.5rem 1rem;
+      margin-left: 0.5rem;
+      width: auto;
+    }
+    
+    .btn-copy:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .result-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      background: white;
+      min-height: 150px;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      line-height: 1.6;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+    
+    .result-placeholder {
+      color: #999;
+      font-style: italic;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 1rem 0;
+      color: var(--secondary-color);
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(74, 111, 165, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    .copy-success {
+      position: absolute;
+      top: -10px;
+      right: 10px;
+      background-color: var(--success-color);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .copy-success.show {
+      opacity: 1;
+    }
+
+    /* 新增历史记录样式 */
+    #history-section {
+      margin-top: 2rem;
+    }
+    #history-section h2 {
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    #history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .history-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+    .history-original {
+      font-weight: 500;
+      color: var(--dark-color);
+      margin-bottom: 0.75rem;
+      white-space: pre-wrap;
+    }
+    .history-translation {
+      color: var(--secondary-color);
+      white-space: pre-wrap;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .language-selector {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    .tooltip-icon {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      color: white;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+      cursor: help;
+      position: relative;
+    }
+
+    .tooltip-icon:hover::after {
+      content: attr(title);
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0.5rem;
+      width: 200px;
+      padding: 0.75rem;
+      background: white;
+      color: var(--dark-color);
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      font-size: 0.9rem;
+      font-weight: normal;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* 新增高级选项样式 */
+    .hidden {
+      display: none;
+    }
+    #advanced-options {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    }
+    #toggle-advanced {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      transition: background-color 0.3s;
+      width: 100%;
+    }
+    #toggle-advanced:hover {
+      background-color: #597ea8;
+    }
+    #advanced-options label {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: block;
+      color: var(--dark-color);
+    }
+    #custom-prompt {
+      width: 100%;
+      min-height: 80px;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      margin-bottom: 1rem;
+    }
+    .temperature-control {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    #temperature-range {
+      flex: 1;
+    }
+    #temperature-input {
+      width: 60px;
+      padding: 0.3rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>智能翻译工具</h1>
+      <p class="subtitle">准确、流畅的多语言翻译体验</p>
+    </header>
+    
+    <div class="translation-card">
+      <form id="translate-form">
+        <div class="form-group">
+          <label for="source-text">输入原文</label>
+          <textarea id="source-text" name="text" required placeholder="请输入需要翻译的文本..."></textarea>
+        </div>
+        
+        <div class="language-selector">
+          <div class="form-group" style="flex: 1;">
+            <label for="lang">源语言</label>
+            <select id="lang" name="lang">
+              <option value="auto">自动检测</option>
+              <option value="en">英文</option>
+              <option value="fr">法语</option>
+              <option value="de">德语</option>
+              <option value="la">拉丁语</option>
+              <option value="ja">日语</option>
+              <option value="ko">韩语</option>
+              <!-- 后续可扩展 -->
+            </select>
+          </div>
+          
+          <div class="form-group" style="flex: 1;">
+            <label for="target-lang">目标语言</label>
+            <select id="target-lang" name="target-lang">
+              <option value="zh">中文</option>
+              <option value="en">英文</option>
+              <option value="fr">法语</option>
+              <option value="de">德语</option>
+              <!-- 后续可扩展 -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="enhance-translation" name="enhance"> 
+            启用强化翻译
+            <span class="tooltip-icon" title="强化翻译会进行两轮处理：首轮生成基础翻译，次轮结合原文对翻译进行优化润色，以获得更自然流畅的结果">?</span>
+          </label>
+        </div>
+
+        <button type="button" id="toggle-advanced">显示高级选项</button>
+        <div id="advanced-options" class="hidden">
+          <div class="form-group">
+            <label for="custom-prompt">自定义提示信息</label>
+            <textarea id="custom-prompt" name="customPrompt" placeholder="可选：输入自定义提示以指导翻译模型"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="temperature-range">温度参数设置</label>
+            <div class="temperature-control">
+              <input type="range" id="temperature-range" min="0" max="1" step="0.01" value="0.5">
+              <input type="number" id="temperature-input" min="0" max="1" step="0.01" value="0.5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="primary-provider">选择初译模型</label>
+            <select id="primary-provider" name="primary_provider">
+              <option value="deepseek">DeepSeek</option>
+              <option value="qwen">Qwen</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="optimization-provider">选择优化模型</label>
+            <select id="optimization-provider" name="optimization_provider">
+              <option value="">同初译模型</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="qwen">Qwen</option>
+            </select>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn">翻译文本</button>
+      </form>
+    </div>
+    
+    <div class="result-header">
+      <h2>翻译结果</h2>
+      <button id="copy-btn" class="btn btn-copy">复制结果</button>
+    </div>
+    <div class="result-box" id="translation-result">
+      <span class="result-placeholder">翻译结果将显示在这里...</span>
+    </div>
+    <div class="copy-success" id="copy-success">已复制!</div>
+    <div class="loading" id="loading-indicator">
+      <span class="loading-spinner"></span>正在翻译中...
+    </div>
+
+    <!-- 新增翻译历史显示/隐藏按钮和历史记录区域 -->
+    <button id="toggle-history" type="button" class="btn" style="margin-bottom: 1rem;">显示翻译历史</button>
+    <section id="history-section" class="hidden">
+      <h2>翻译历史</h2>
+      <div id="history-list">
+        <!-- 历史记录卡片将动态插入这里 -->
+      </div>
+    </section>
+  </div>
+  
+  <footer>
+    <p>© 2023 阅读工具箱 | 智能翻译工具</p>
+  </footer>
+
+  <script>
+    async function saveTranslation(text, translation, lang, targetLang) {
+      try {
+        await fetch('/api/translation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, translation, lang, targetLang })
+        });
+      } catch (error) {
+        console.error('保存翻译历史失败:', error);
+      }
+    }
+
+    async function loadHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      try {
+        const res = await fetch('/api/translation/history');
+        if (!res.ok) throw new Error('获取历史记录失败');
+        const data = await res.json();
+
+        // 1. 拿到历史数组
+        const translations = data.translations || [];
+        if (Array.isArray(translations) && translations.length > 0) {
+          translations.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+            // 新增删除按钮
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'history-delete-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.setAttribute('data-id', item.id);
+            deleteBtn.style.position = 'absolute';
+            deleteBtn.style.top = '12px';
+            deleteBtn.style.right = '16px';
+            deleteBtn.style.background = 'transparent';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.fontSize = '1.2rem';
+            deleteBtn.style.color = '#888';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.title = '删除此条记录';
+            card.style.position = 'relative';
+            card.appendChild(deleteBtn);
+            const original = document.createElement('div');
+            original.className = 'history-original';
+            original.textContent = item.original_text || '';
+            const translation = document.createElement('div');
+            translation.className = 'history-translation';
+            translation.textContent = item.translated_text || '';
+            card.appendChild(original);
+            card.appendChild(translation);
+            historyList.appendChild(card);
+          });
+          // 绑定所有删除按钮事件
+          historyList.querySelectorAll('.history-delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              if (confirm('确定要删除这条翻译历史吗？')) {
+                const id = this.getAttribute('data-id');
+                fetch(`/api/translation/${id}`, {
+                  method: 'DELETE'
+                }).then(res => {
+                  if (res.status === 204) {
+                    loadHistory(); // 删除后刷新列表
+                  } else if (res.status === 404) {
+                    alert('记录不存在或已删除');
+                  } else {
+                    alert('删除失败，请重试');
+                  }
+                }).catch(() => {
+                  alert('删除请求出错');
+                });
+              }
+            });
+          });
+        } else {
+          historyList.innerHTML = '<p class="result-placeholder">暂无翻译历史</p>';
+        }
+      } catch (error) {
+        console.error('加载翻译历史错误:', error);
+        historyList.innerHTML = '<p class="result-placeholder">加载翻译历史失败</p>';
+      }
+    }
+
+    document.getElementById('translate-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const text = document.getElementById('source-text').value.trim();
+      const lang = document.getElementById('lang').value;
+      const targetLang = document.getElementById('target-lang').value;
+      const enhance = document.getElementById('enhance-translation').checked;
+      const customPrompt = document.getElementById('custom-prompt').value.trim();
+      const temperature = parseFloat(document.getElementById('temperature-range').value);
+      const primary_provider = document.getElementById('primary-provider').value;
+      const optimizationProviderSelect = document.getElementById('optimization-provider');
+      const optimization_provider = optimizationProviderSelect.disabled ? '' : optimizationProviderSelect.value;
+
+      if (!text) {
+        alert('请输入需要翻译的文本');
+        return;
+      }
+      
+      const resultBox = document.getElementById('translation-result');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      
+      // 显示加载状态
+      resultBox.innerHTML = '';
+      loadingIndicator.style.display = 'block';
+      
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, lang, targetLang, enhance, customPrompt, temperature, primary_provider, optimization_provider })
+        });
+        
+        if (!res.ok) throw new Error('翻译请求失败');
+        
+        const data = await res.json();
+        let translation = '';
+        if (enhance && data.optimized) {
+          translation = data.optimized;
+        } else {
+          translation = data.translation || '翻译失败，请重试';
+        }
+        resultBox.textContent = translation;
+
+        // 移除占位符元素，避免复制时误判
+        const placeholder = resultBox.querySelector('.result-placeholder');
+        if (placeholder) {
+          placeholder.remove();
+        }
+
+        if (translation && translation !== '翻译失败，请重试') {
+          await saveTranslation(text, translation, lang, targetLang);
+          await loadHistory();
+        }
+      } catch (error) {
+        console.error('翻译错误:', error);
+        resultBox.textContent = '翻译过程中出现错误，请稍后再试';
+      } finally {
+        loadingIndicator.style.display = 'none';
+      }
+    });
+
+    // 复制功能实现
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const resultBox = document.getElementById('translation-result');
+      const placeholder = resultBox.querySelector('.result-placeholder');
+      const resultText = resultBox.textContent.trim();
+      
+      if (placeholder || resultText === '') {
+        alert('没有可复制的内容');
+        return;
+      }
+      
+      navigator.clipboard.writeText(resultText).then(() => {
+        const copySuccess = document.getElementById('copy-success');
+        copySuccess.classList.add('show');
+        setTimeout(() => {
+          copySuccess.classList.remove('show');
+        }, 2000);
+      }).catch(err => {
+        console.error('复制失败:', err);
+        alert('复制失败，请手动选择文本复制');
+      });
+    });
+
+    // 页面加载时拉取历史记录
+    window.addEventListener('load', () => {
+      loadHistory();
+    });
+
+    // 翻译历史显示/隐藏功能
+    const toggleHistoryBtn = document.getElementById('toggle-history');
+    const historySection = document.getElementById('history-section');
+    toggleHistoryBtn.addEventListener('click', () => {
+      if (historySection.classList.contains('hidden')) {
+        historySection.classList.remove('hidden');
+        toggleHistoryBtn.textContent = '隐藏翻译历史';
+      } else {
+        historySection.classList.add('hidden');
+        toggleHistoryBtn.textContent = '显示翻译历史';
+      }
+    });
+
+    // 高级选项折叠面板切换
+    const toggleAdvancedBtn = document.getElementById('toggle-advanced');
+    const advancedOptions = document.getElementById('advanced-options');
+
+    toggleAdvancedBtn.addEventListener('click', () => {
+      if (advancedOptions.classList.contains('hidden')) {
+        advancedOptions.classList.remove('hidden');
+        toggleAdvancedBtn.textContent = '隐藏高级选项';
+      } else {
+        advancedOptions.classList.add('hidden');
+        toggleAdvancedBtn.textContent = '显示高级选项';
+      }
+    });
+
+    // 联动滑块和数字输入框
+    const tempRange = document.getElementById('temperature-range');
+    const tempInput = document.getElementById('temperature-input');
+
+    tempRange.addEventListener('input', () => {
+      tempInput.value = tempRange.value;
+    });
+
+    tempInput.addEventListener('input', () => {
+      let val = parseFloat(tempInput.value);
+      if (isNaN(val)) val = 0;
+      if (val < 0) val = 0;
+      if (val > 1) val = 1;
+      tempInput.value = val.toFixed(2);
+      tempRange.value = val.toFixed(2);
+    });
+
+    // 联动强化翻译勾选与优化模型选择框
+    const enhanceCheckbox = document.getElementById('enhance-translation');
+    const optimizationProviderSelect = document.getElementById('optimization-provider');
+
+    function toggleOptimizationProviderState() {
+      optimizationProviderSelect.disabled = !enhanceCheckbox.checked;
+    }
+
+    enhanceCheckbox.addEventListener('change', toggleOptimizationProviderState);
+    window.addEventListener('load', toggleOptimizationProviderState);
+  </script>
+</body>
+</html>
